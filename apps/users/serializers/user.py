@@ -578,12 +578,10 @@ class UserManageSerializer(serializers.Serializer):
         ids = serializers.ListField(required=True, label=_('User IDs'))
 
         def batch_delete(self, with_valid=True):
-            if with_valid:
-                self.is_valid(raise_exception=True)
-            ids = self.data.get('ids')
-            if not ids:
+            user_ids = self.data.get('ids')
+            if not user_ids:
                 raise AppApiException(1004, _('User IDs cannot be empty'))
-            User.objects.filter(id__in=ids).delete()
+            User.objects.filter(id__in=user_ids).exclude(id='f0dd8f71-e4ee-11ee-8c84-a8a1595801ab').delete()
             return True
 
     def get_all_user_list(self):
@@ -819,13 +817,17 @@ def _create_resource_permission_instances(workspace_id, resource_maps, user_id, 
     创建资源权限实例列表
     """
     instances = []
+    if permission == ResourcePermission.MANAGE:
+        permission = [ResourcePermission.VIEW, ResourcePermission.MANAGE]
+    else:
+        permission = [permission]
 
     # 应用权限
     for rid in resource_maps['apps'].get(workspace_id, []):
         instances.append(WorkspaceUserResourcePermission(
             target=rid,
             auth_target_type=AuthTargetType.APPLICATION.value,
-            permission_list=[permission],
+            permission_list=permission,
             workspace_id=workspace_id,
             user_id=user_id,
             auth_type=auth_type
@@ -836,7 +838,7 @@ def _create_resource_permission_instances(workspace_id, resource_maps, user_id, 
         instances.append(WorkspaceUserResourcePermission(
             target=fid,
             auth_target_type=AuthTargetType.APPLICATION.value,
-            permission_list=[permission],
+            permission_list=permission,
             workspace_id=workspace_id,
             user_id=user_id,
             auth_type=auth_type
@@ -847,7 +849,7 @@ def _create_resource_permission_instances(workspace_id, resource_maps, user_id, 
         instances.append(WorkspaceUserResourcePermission(
             target=kid,
             auth_target_type=AuthTargetType.KNOWLEDGE.value,
-            permission_list=[permission],
+            permission_list=permission,
             workspace_id=workspace_id,
             user_id=user_id,
             auth_type=auth_type
@@ -858,7 +860,7 @@ def _create_resource_permission_instances(workspace_id, resource_maps, user_id, 
         instances.append(WorkspaceUserResourcePermission(
             target=kf,
             auth_target_type=AuthTargetType.KNOWLEDGE.value,
-            permission_list=[permission],
+            permission_list=permission,
             workspace_id=workspace_id,
             user_id=user_id,
             auth_type=auth_type
@@ -869,7 +871,7 @@ def _create_resource_permission_instances(workspace_id, resource_maps, user_id, 
         instances.append(WorkspaceUserResourcePermission(
             target=tid,
             auth_target_type=AuthTargetType.TOOL.value,
-            permission_list=[permission],
+            permission_list=permission,
             workspace_id=workspace_id,
             user_id=user_id,
             auth_type=auth_type
@@ -880,7 +882,7 @@ def _create_resource_permission_instances(workspace_id, resource_maps, user_id, 
         instances.append(WorkspaceUserResourcePermission(
             target=tf,
             auth_target_type=AuthTargetType.TOOL.value,
-            permission_list=[permission],
+            permission_list=permission,
             workspace_id=workspace_id,
             user_id=user_id,
             auth_type=auth_type
@@ -891,7 +893,7 @@ def _create_resource_permission_instances(workspace_id, resource_maps, user_id, 
         instances.append(WorkspaceUserResourcePermission(
             target=mid,
             auth_target_type=AuthTargetType.MODEL.value,
-            permission_list=[permission],
+            permission_list=permission,
             workspace_id=workspace_id,
             user_id=user_id,
             auth_type=auth_type

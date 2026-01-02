@@ -26,6 +26,14 @@
         </el-button>
       </div>
       <div v-else-if="!route.path.includes('share/')">
+        <el-button
+          class="ml-8"
+          v-if="permissionPrecise.create()"
+          @click="openTemplateStoreDialog()"
+        >
+          <AppIcon iconName="app-template-center" class="mr-4" />
+          {{ $t('workflow.setting.templateCenter') }}
+        </el-button>
         <el-button @click="showPopover = !showPopover">
           <AppIcon iconName="app-add-outlined" class="mr-4" />
           {{ $t('workflow.setting.addComponent') }}
@@ -52,16 +60,10 @@
                 <AppIcon iconName="app-to-import-doc" class="color-secondary"></AppIcon>
                 {{ $t('workflow.operation.toImportDoc') }}
               </el-dropdown-item>
-              <el-dropdown-item
-                @click.stop="exportKnowledgeWorkflow(detail.name, detail.id)"
-                v-if="permissionPrecise.workflow_export(id)"
-              >
-                <AppIcon iconName="app-export" class="color-secondary"></AppIcon>
-                {{ $t('common.export') }}
-              </el-dropdown-item>
               <el-upload
                 class="import-button"
                 ref="elUploadRef"
+                accept=".kbwf"
                 :file-list="[]"
                 action="#"
                 multiple
@@ -73,9 +75,17 @@
               >
                 <el-dropdown-item>
                   <AppIcon iconName="app-import" class="color-secondary"></AppIcon>
-                  {{ $t('common.import', '导入') }}
+                  {{ $t('workflow.operation.importWorkflow') }}
                 </el-dropdown-item>
               </el-upload>
+              <el-dropdown-item
+                @click.stop="exportKnowledgeWorkflow(detail.name, detail.id)"
+                v-if="permissionPrecise.workflow_export(id)"
+              >
+                <AppIcon iconName="app-export" class="color-secondary"></AppIcon>
+                {{ $t('workflow.operation.exportWorkflow') }}
+              </el-dropdown-item>
+
               <el-dropdown-item @click="openListAction" divided>
                 <AppIcon iconName="app-execution-record" class="color-secondary"></AppIcon>
                 {{ $t('workflow.ExecutionRecord') }}
@@ -161,6 +171,12 @@
       v-click-outside="clickoutsideHistory"
       @refreshVersion="refreshVersion"
     />
+    <TemplateStoreDialog
+      ref="templateStoreDialogRef"
+      :api-type="apiType"
+      source="work_flow"
+      @refresh="getDetail"
+    />
   </div>
 </template>
 <script setup lang="ts">
@@ -174,7 +190,6 @@ import PublishHistory from '@/views/knowledge-workflow/component/PublishHistory.
 import { isAppIcon, resetUrl } from '@/utils/common'
 import { MsgSuccess, MsgError, MsgConfirm } from '@/utils/message'
 import { datetimeFormat } from '@/utils/time'
-import { mapToUrlParams } from '@/utils/application'
 import useStore from '@/stores'
 import { KnowledgeWorkFlowInstance } from '@/workflow/common/validate'
 import { hasPermission } from '@/utils/permission'
@@ -186,6 +201,7 @@ import permissionMap from '@/permission'
 import { WorkflowMode } from '@/enums/application'
 import { loadSharedApi } from '@/utils/dynamics-api/shared-api'
 import { knowledgeBaseNode } from '@/workflow/common/data'
+import TemplateStoreDialog from '@/views/knowledge/template-store/TemplateStoreDialog.vue'
 provide('getResourceDetail', () => detail)
 provide('workflowMode', WorkflowMode.Knowledge)
 provide('loopWorkflowMode', WorkflowMode.KnowledgeLoop)
@@ -396,7 +412,6 @@ const importKnowledgeWorkflow = (file: any) => {
   formData.append('file', file.raw)
   const name = file.name.replace('.kbwf', '')
   elUploadRef.value.clearFiles()
-  debugger
   MsgConfirm(
     t('common.tip'),
     `${t('views.application.tip.confirmUse')} ${name} ${t('views.application.tip.overwrite')}?`,
@@ -647,6 +662,11 @@ const toImportDoc = () => {
       .then(() => {})
       .catch(() => {})
   }
+}
+
+const templateStoreDialogRef = ref()
+function openTemplateStoreDialog() {
+  templateStoreDialogRef.value?.open(folderId)
 }
 
 /**

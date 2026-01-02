@@ -139,7 +139,12 @@
                 />
               </div>
 
-              <el-tooltip effect="dark" :content="$t('workflow.ExecutionRecord')" placement="top">
+              <el-tooltip
+                effect="dark"
+                :content="$t('workflow.ExecutionRecord')"
+                placement="top"
+                v-if="knowledgeDetail?.type === 4"
+              >
                 <el-button @click="openListAction" class="ml-12">
                   <AppIcon iconName="app-execution-record" class="color-secondary"></AppIcon>
                 </el-button>
@@ -524,9 +529,7 @@
                             @click.stop="downloadDocument(row)"
                             v-if="permissionPrecise.doc_download(id)"
                           >
-                            <el-icon class="color-secondary">
-                              <Download />
-                            </el-icon>
+                            <AppIcon iconName="app-download" class="color-secondary" />
                             {{ $t('views.document.setting.download') }}
                           </el-dropdown-item>
                           <el-upload
@@ -539,9 +542,7 @@
                             :on-change="(file: any, fileList: any) => replaceDocument(file, row)"
                           >
                             <el-dropdown-item>
-                              <el-icon class="color-secondary">
-                                <Upload />
-                              </el-icon>
+                              <AppIcon iconName="app-upload" class="color-secondary" />
                               {{ $t('views.document.setting.replace') }}
                             </el-dropdown-item>
                           </el-upload>

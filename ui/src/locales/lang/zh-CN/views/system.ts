@@ -145,6 +145,8 @@ export default {
       currentOnly: '仅当前资源',
       includeAll: '包含所有子资源',
       effectiveResource: '生效资源',
+      defaultPermission: '默认权限',
+      defaultPermissionTip: '所选工作空间下所有资源的默认权限',
     },
   },
   resource_management: {
@@ -161,4 +163,8 @@ export default {
   time: '次',
   setting: '登录设置',
   third_party_user_default_role: '第三方用户默认角色分配',
+  resourceMapping: {
+    title: '查看关联资源',
+    sub_title: '关联资源',
+  },
 }

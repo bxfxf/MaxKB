@@ -61,6 +61,14 @@
               <el-option :label="$t('common.status.unpublished')" value="unpublished" />
             </el-select>
           </div>
+          <el-button
+            class="ml-8"
+            v-if="permissionPrecise.create()"
+            @click="openTemplateStoreDialog()"
+          >
+            <AppIcon iconName="app-template-center" class="mr-4" />
+            {{ $t('workflow.setting.templateCenter') }}
+          </el-button>
           <el-dropdown trigger="click" v-if="permissionPrecise.create()">
             <el-button type="primary" class="ml-8">
               {{ $t('common.create') }}
@@ -80,7 +88,9 @@
                       />
                     </el-avatar>
                     <div class="pre-wrap ml-8">
-                      <div class="lighter">{{ $t('views.application.simple') }}</div>
+                      <div class="lighter">
+                        {{ $t('views.application.simpleAgent') }}
+                      </div>
                       <el-text type="info" size="small"
                         >{{ $t('views.application.simplePlaceholder') }}
                       </el-text>
@@ -97,9 +107,9 @@
                       />
                     </el-avatar>
                     <div class="pre-wrap ml-8">
-                      <div class="lighter">{{ $t('views.application.workflow') }}</div>
+                      <div class="lighter">{{ $t('views.application.AdvancedAgent') }}</div>
                       <el-text type="info" size="small"
-                        >{{ $t('views.application.workflowPlaceholder') }}
+                        >{{ $t('views.application.advancedPlaceholder') }}
                       </el-text>
                     </div>
                   </div>
@@ -121,7 +131,7 @@
                         <img src="@/assets/icon_import.svg" alt="" />
                       </el-avatar>
                       <div class="pre-wrap ml-8">
-                        <div class="lighter">{{ $t('common.importCreate') }}</div>
+                        <div class="lighter">{{ $t('views.application.importApplication') }}</div>
                       </div>
                     </div>
                   </el-dropdown-item>
@@ -176,7 +186,7 @@
                   </template>
                   <template #tag>
                     <el-tag v-if="isWorkFlow(item.type)" class="warning-tag">
-                      {{ $t('views.application.workflow') }}
+                      {{ $t('views.application.senior') }}
                     </el-tag>
                     <el-tag class="blue-tag" v-else>
                       {{ $t('views.application.simple') }}
@@ -291,6 +301,7 @@
       :type="SourceTypeEnum.APPLICATION"
       ref="ResourceAuthorizationDrawerRef"
     />
+    <TemplateStoreDialog ref="templateStoreDialogRef" :api-type="apiType" @refresh="getList" />
   </LayoutContainer>
 </template>
 
@@ -316,6 +327,7 @@ import WorkspaceApi from '@/api/workspace/workspace'
 import { hasPermission } from '@/utils/permission'
 import { ComplexPermission } from '@/utils/permission/type'
 import { EditionConst, PermissionConst, RoleConst } from '@/utils/permission/data'
+import TemplateStoreDialog from '@/views/application/template-store/TemplateStoreDialog.vue'
 
 const router = useRouter()
 
@@ -350,6 +362,7 @@ const applicationList = ref<any[]>([])
 const CopyApplicationDialogRef = ref()
 
 const ResourceAuthorizationDrawerRef = ref()
+
 function openAuthorization(item: any) {
   ResourceAuthorizationDrawerRef.value.open(item.id)
 }
@@ -586,7 +599,9 @@ function settingApplication(event: any, row: any) {
 function deleteApplication(row: any) {
   MsgConfirm(
     `${t('views.application.delete.confirmTitle')}${row.name} ?`,
-    t('views.application.delete.confirmMessage'),
+    row.resource_count > 0
+      ? t('views.application.delete.resourceCountMessage', row.resource_count)
+      : '',
     {
       confirmButtonText: t('common.confirm'),
       cancelButtonText: t('common.cancel'),
@@ -662,7 +677,6 @@ function getFolder(bool?: boolean) {
     })
 }
 
-
 function folderClickHandle(row: any) {
   if (row.id === folder.currentFolder?.id) {
     return
@@ -683,6 +697,12 @@ function searchHandle() {
   paginationConfig.current_page = 1
   applicationList.value = []
   getList()
+}
+
+const templateStoreDialogRef = ref()
+
+function openTemplateStoreDialog() {
+  templateStoreDialogRef.value?.open(folder.currentFolder.id)
 }
 
 function getList() {

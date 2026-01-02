@@ -35,6 +35,14 @@
             <el-option v-for="u in user_options" :key="u.id" :value="u.id" :label="u.nick_name" />
           </el-select>
         </div>
+        <el-button
+          class="ml-8"
+          v-if="!isShared && permissionPrecise.create()"
+          @click="openTemplateStoreDialog()"
+        >
+          <AppIcon iconName="app-template-center" class="mr-4" />
+          {{ $t('workflow.setting.templateCenter') }}
+        </el-button>
         <el-dropdown trigger="click" v-if="!isShared && permissionPrecise.create()">
           <el-button type="primary" class="ml-8">
             {{ $t('common.create') }}
@@ -232,6 +240,17 @@
                             {{ $t('views.system.resourceAuthorization.title') }}
                           </el-dropdown-item>
                           <el-dropdown-item
+                            text
+                            @click.stop="openResourceMappingDrawer(item)"
+                            v-if="permissionPrecise.relate_map(item.id)"
+                          >
+                            <AppIcon
+                              iconName="app-resource-mapping"
+                              class="color-secondary"
+                            ></AppIcon>
+                            {{ $t('views.system.resourceMapping.title')}}
+                          </el-dropdown-item>
+                          <el-dropdown-item
                             @click.stop="openMoveToDialog(item)"
                             v-if="permissionPrecise.edit(item.id) && apiType === 'workspace'"
                           >
@@ -305,6 +324,8 @@
     ref="ResourceAuthorizationDrawerRef"
     v-if="apiType === 'workspace'"
   />
+  <TemplateStoreDialog ref="templateStoreDialogRef" :api-type="apiType" @refresh="getList" />
+  <ResourceMappingDrawer ref="resourceMappingDrawerRef"></ResourceMappingDrawer>
 </template>
 
 <script lang="ts" setup>
@@ -329,6 +350,13 @@ import { i18n_name } from '@/utils/common'
 import { SourceTypeEnum } from '@/enums/common'
 import { loadSharedApi } from '@/utils/dynamics-api/shared-api'
 import permissionMap from '@/permission'
+import TemplateStoreDialog from '@/views/knowledge/template-store/TemplateStoreDialog.vue'
+import ResourceMappingDrawer from '@/components/resource_mapping/index.vue'
+const resourceMappingDrawerRef = ref<InstanceType<typeof ResourceMappingDrawer>>()
+
+const openResourceMappingDrawer = (knowledge: any) => {
+  resourceMappingDrawerRef.value?.open('KNOWLEDGE', knowledge)
+}
 const router = useRouter()
 const route = useRoute()
 const { folder, user, knowledge } = useStore()
@@ -368,6 +396,7 @@ const MoreFilledPermission = (item: any) => {
     permissionPrecise.value.export(item.id) ||
     permissionPrecise.value.auth(item.id) ||
     permissionPrecise.value.delete(item.id) ||
+    permissionPrecise.value.relate_map(item.id) ||
     isSystemShare.value
   )
 }
@@ -466,7 +495,7 @@ const exportZipKnowledge = (item: any) => {
 function deleteKnowledge(row: any) {
   MsgConfirm(
     `${t('views.knowledge.delete.confirmTitle')}${row.name} ?`,
-    `${t('views.knowledge.delete.confirmMessage1')} ${row.application_mapping_count} ${t('views.knowledge.delete.confirmMessage2')}`,
+    row.resource_count > 0 ? t('views.knowledge.delete.resourceCountMessage', row.resource_count) : '',
     {
       confirmButtonText: t('common.confirm'),
       confirmButtonClass: 'danger',
@@ -539,6 +568,11 @@ function searchHandle() {
 
 function refreshFolder() {
   emit('refreshFolder')
+}
+
+const templateStoreDialogRef = ref()
+function openTemplateStoreDialog() {
+  templateStoreDialogRef.value?.open(folder.currentFolder.id)
 }
 
 onMounted(() => {

@@ -13,6 +13,7 @@ from django.db.models import QuerySet
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from application.flow.tools import save_simple_mapping
 from application.models import Application, ChatRecord, Chat, ApplicationVersion, ChatUserType, ApplicationTypeChoices, \
     ApplicationKnowledgeMapping
 from application.serializers.application_chat import ChatCountSerializer
@@ -113,6 +114,21 @@ class ChatInfo:
             else:
                 self.chat_user = {'username': '游客'}
         return self.chat_user
+
+    def get_chat_user_group(self, asker=None):
+        chat_user  = self.get_chat_user(asker=asker)
+        chat_user_id = chat_user.get('id')
+
+        if not chat_user_id:
+            return  []
+
+        user_group_relation_model = DatabaseModelManage.get_model("user_group_relation")
+        if user_group_relation_model:
+            return [{
+                        'id': user_group_relation.group_id,
+                        'name': user_group_relation.group.name
+                    } for user_group_relation  in QuerySet(user_group_relation_model).select_related('group').filter(user_id=chat_user_id)]
+        return []
 
     def to_base_pipeline_manage_params(self):
         self.get_application()
@@ -332,5 +348,4 @@ def update_resource_mapping_by_application(application_id: str):
                               instance_mapping)
         return
     else:
-        save_workflow_mapping({}, ResourceType.APPLICATION, str(application_id),
-                              instance_mapping)
+        save_simple_mapping(application, ResourceType.APPLICATION, str(application_id))

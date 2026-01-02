@@ -76,6 +76,8 @@ export default {
     fail: 'Failed',
     all: 'All',
     padding: 'Padding',
+    REVOKED: 'Cancelled',
+    REVOKE: 'Cancelling',
   },
   param: {
     outputParam: 'Output Parameters',
@@ -83,6 +85,7 @@ export default {
     initParam: 'Startup Parameters',
     editParam: 'Edit Parameter',
     addParam: 'Add Parameter',
+    exception: 'Exception capture',
   },
   aggregationStrategy: 'Aggregation Strategy',
   inputPlaceholder: 'Please input',
@@ -95,7 +98,6 @@ export default {
   rename: 'Rename',
   renameSuccess: 'Successful',
   EditAvatarDialog: {
-    title: 'App Logo',
     customizeUpload: 'Custom Upload',
     upload: 'Upload',
     default: 'Default Logo',
@@ -139,4 +141,5 @@ export default {
     prev: 'Previous',
     next: 'Next',
   },
+  use: 'Use',
 }

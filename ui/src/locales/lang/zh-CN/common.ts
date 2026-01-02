@@ -77,6 +77,8 @@ export default {
     fail: '失败',
     all: '全部',
     padding: '执行中',
+    REVOKED: '已取消',
+    REVOKE: '取消中',
   },
   param: {
     outputParam: '输出参数',
@@ -84,6 +86,7 @@ export default {
     initParam: '启动参数',
     editParam: '编辑参数',
     addParam: '添加参数',
+    exception: '异常捕获',
   },
   aggregationStrategy: '聚合策略',
   inputPlaceholder: '请输入',
@@ -96,7 +99,6 @@ export default {
   rename: '重命名',
   renameSuccess: '重命名成功',
   EditAvatarDialog: {
-    title: '应用头像',
     customizeUpload: '自定义上传',
     upload: '上传',
     default: '默认Logo',
@@ -139,4 +141,5 @@ export default {
     prev: '上一步',
     next: '下一步',
   },
+  use: '使用',
 }
